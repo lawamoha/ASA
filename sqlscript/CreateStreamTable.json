@@ -1,0 +1,17 @@
+{
+	"name": "CreateStreamTable",
+	"properties": {
+		"content": {
+			"query": "CREATE TABLE [dbo].[TollInfo]\n(\n    make VARCHAR(50),\n    model VARCHAR(50),\n    vehicleType INT,\n    state VARCHAR(5),\n    tollAmount INT,\n    tag BIGINT,\n    tollId INT\n    )\n\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dedsqlpoolforstreamingdata",
+				"poolName": "dedsqlpoolforstreamingdata"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

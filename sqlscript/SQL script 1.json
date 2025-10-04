@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "SELECT TOP (100) [make]\n,[model]\n,[vehicleType]\n,[state]\n,[tollAmount]\n,[tag]\n,[tollId]\n FROM [dbo].[TollInfo]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dedsqlpoolforstreamingdata",
+				"poolName": "dedsqlpoolforstreamingdata"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
