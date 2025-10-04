@@ -1,0 +1,984 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "desynapsespace"
+		},
+		"LsMyCosmosDbNoSql_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LsMyCosmosDbNoSql'"
+		},
+		"desynapsespace-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'desynapsespace-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:desynapsespace.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"linked_service_to_external_adls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'linked_service_to_external_adls'"
+		},
+		"ls_mystorageaccount_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_mystorageaccount'"
+		},
+		"ls_project9_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_project9'"
+		},
+		"LSdlstestdebc_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://satestdebc.dfs.core.windows.net/"
+		},
+		"city_safety_boston_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'city_safety_boston'"
+		},
+		"city_safety_newyork_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'city_safety_newyork'"
+		},
+		"desynapsespace-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://synapsedatalake109.dfs.core.windows.net"
+		},
+		"linked_service_to_external_adls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://storagededls.dfs.core.windows.net/"
+		},
+		"ls_mystorageaccount_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://mynewstorageacctdb.dfs.core.windows.net/"
+		},
+		"ls_project9_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://sacproject9.dfs.core.windows.net/"
+		},
+		"us-employment-hours-earnings-state_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'us-employment-hours-earnings-state'"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/dedsqlpoolforstreamingdata')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LSdlstestdebc')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "linked service to establish connection to a dls externally (project debc)",
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LSdlstestdebc_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LsMyCosmosDbNoSql')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDb",
+				"typeProperties": {
+					"connectionString": "[parameters('LsMyCosmosDbNoSql_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/city_safety_boston')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('city_safety_boston_sasUri')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/city_safety_newyork')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('city_safety_newyork_sasUri')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/desynapsespace-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('desynapsespace-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/desynapsespace-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('desynapsespace-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/linked_service_to_external_adls')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('linked_service_to_external_adls_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('linked_service_to_external_adls_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_mystorageaccount')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_mystorageaccount_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_mystorageaccount_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_project9')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_project9_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_project9_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/us-employment-hours-earnings-state')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('us-employment-hours-earnings-state_sasUri')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CLASS TEST 5-31 MOH109')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "TEST PRACTICE RESEARCH"
+				},
+				"content": {
+					"query": "DROP EXTERNAL DATA SOURCE Datasource\n\nCREATE EXTERNAL DATA SOURCE [Datasource]\nWITH (\t\nLOCATION = 'abfss://synapse@satestdebc.dfs.core.windows.net/data')\nGO\n\nDROP EXTERNAL FILE FORMAT FileFormat1\n\nCREATE EXTERNAL FILE FORMAT [FileFormat1]\nWITH \n( \n   FORMAT_TYPE = DELIMITEDTEXT ,\n   FORMAT_OPTIONS \n   (\n      FIELD_TERMINATOR = ',',\n      USE_TYPE_DEFAULT = FALSE\n   )\n)\nGO\n\n\nCREATE TABLE Customers( CUSTOMERID int,FIRSTNAME NVARCHAR (10),LASTNAME NVARCHAR(10),REGIONID NVARCHAR (10));\nCREATE TABLE Products ( PRODUCTID INT, PRODUCTNAME VARCHAR (10), CATEGORY NVARCHAR(20), PRICE INT);\nCREATE TABLE Region (REGIONID NVARCHAR (10), REGIONNAME NVARCHAR (10));\nCREATE TABLE Sales (SALEID INT,PRODUCTID INT, CUSTOMERID INT, QUANTITY INT);\n\n\nCOPY INTO dbo.Customers\nFROM 'https://satestdebc.dfs.core.windows.net/synapse/data/customers.csv'\nWITH (\n FILE_TYPE = 'CSV',\n CREDENTIAL = (IDENTITY= 'Shared Access Signature', SECRET='sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-06-08T02:15:11Z&st=2025-05-31T18:15:11Z&spr=https&sig=TZQy11oh2RM4EEF7wYWX68i18L2cWIufOY41vmnmK0o%3D'),\nFIELDTERMINATOR = ',',\nROWTERMINATOR = '0x0A',\nFIRSTROW = 2\n);\n\nCOPY INTO dbo.Products\nFROM 'https://satestdebc.dfs.core.windows.net/synapse/data/products.csv'\nWITH (\n FILE_TYPE = 'CSV',\n CREDENTIAL = (IDENTITY= 'Shared Access Signature', SECRET='sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-06-08T02:15:11Z&st=2025-05-31T18:15:11Z&spr=https&sig=TZQy11oh2RM4EEF7wYWX68i18L2cWIufOY41vmnmK0o%3D'),\nFIELDTERMINATOR = ',',\nROWTERMINATOR = '0x0A',\nFIRSTROW = 2\n);\n\nCOPY INTO dbo.Region\nFROM 'https://satestdebc.dfs.core.windows.net/synapse/data/region.csv'\nWITH (\n FILE_TYPE = 'CSV',\n CREDENTIAL = (IDENTITY= 'Shared Access Signature', SECRET='sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-06-08T02:15:11Z&st=2025-05-31T18:15:11Z&spr=https&sig=TZQy11oh2RM4EEF7wYWX68i18L2cWIufOY41vmnmK0o%3D'),\nFIELDTERMINATOR = ',',\nROWTERMINATOR = '0x0A',\nFIRSTROW = 2\n);\n\nCOPY INTO dbo.Sales\nFROM 'https://satestdebc.dfs.core.windows.net/synapse/data/sales.csv'\nWITH (\n FILE_TYPE = 'CSV',\n CREDENTIAL = (IDENTITY= 'Shared Access Signature', SECRET='sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-06-08T02:15:11Z&st=2025-05-31T18:15:11Z&spr=https&sig=TZQy11oh2RM4EEF7wYWX68i18L2cWIufOY41vmnmK0o%3D'),\nFIELDTERMINATOR = ',',\nROWTERMINATOR = '0x0A',\nFIRSTROW = 2\n);\n\n\nSELECT \nCONCAT (C.FIRSTNAME,' ',C.LASTNAME) AS NAME,\nR.REGIONNAME,\nP.PRODUCTNAME,\nS.QUANTITY,\nP.PRICE,\n(S.QUANTITY * P.PRICE) AS TOTALAMOUNT\n\nFROM Products AS P\nJOIN Sales AS S\nON P.PRODUCTID = S.PRODUCTID\nJOIN Customers AS C\nON C.CUSTOMERID = S.CUSTOMERID\nLEFT JOIN Region AS R\nON R.REGIONID = C.REGIONID \n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "testdedsql",
+						"poolName": "testdedsql"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CreateStreamTable')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE TABLE [dbo].[TollInfo]\n(\n    make VARCHAR(50),\n    model VARCHAR(50),\n    vehicleType INT,\n    state VARCHAR(5),\n    tollAmount INT,\n    tag BIGINT,\n    tollId INT\n    )\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "dedsqlpoolforstreamingdata",
+						"poolName": "dedsqlpoolforstreamingdata"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Define_Complete_Database')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "using scoped credentials and a master key",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "\n-- create master key / database scoped credential\nCREATE DATABASE sqltips\n \n-- Drop if required\nDROP MASTER KEY;\nGO\n \n-------Create master key\nCREATE MASTER KEY ENCRYPTION BY PASSWORD='AcEADre5eHJvEcWFhUf8';\nGO\n \n-- -----Drop if required\n--DROP DATABASE SCOPED CREDENTIAL LakeCredential;\n--GO\n \n-- Create a database scoped credential.\nCREATE DATABASE SCOPED CREDENTIAL LakeCredential\nWITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = 'sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-06-07T09:35:12Z&st=2025-05-28T01:35:12Z&spr=https,http&sig=8PqoGNc40FAabE9ZKbCL7LUR%2BYUUYPm%2FySr2bK%2Bxo%2BA%3D';\n \n-- Show credentials\nSELECT NAME FROM sys.database_scoped_credentials;\nGO\n\n--\n-- 7 - create data source\n--\n \n-- Drop if required\n\n\n--DROP EXTERNAL DATA SOURCE LakeDataSource;\n--GO\n \n-- Create if required\nCREATE EXTERNAL DATA SOURCE LakeDataSource\nWITH\n(\n   LOCATION = 'https://satestdebc.blob.core.windows.net/synapse',\n   CREDENTIAL = LakeCredential\n)\nGO\n \n-- Show data sources\nSELECT * FROM sys.external_data_sources;\nGO\n\n\n-- 8 - create data source\nCREATE SCHEMA [saleslt];\nGO\n\n--\n--- create table – currency using the parquetfiles\n--\n CREATE EXTERNAL FILE FORMAT ParquetFile\nWITH (\n    FORMAT_TYPE = PARQUET\n);\nGO\n\n\nCREATE EXTERNAL FILE FORMAT DelimitedFile\nWITH (\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS\n        ( FIELD_TERMINATOR ='|',\n          USE_TYPE_DEFAULT = FALSE\n        )\n);\nGO\n\n\n-- Drop if required\nDROP EXTERNAL TABLE [saleslt].[dim_Product_category]\nGO\n \n-- Create table\nDROP EXTERNAL TABLE [saleslt].[dim_currency]\nGO\n \n-- Create table\n\nCREATE EXTERNAL TABLE [saleslt].[dim_currency]\n(\n   [CurrencyKey] [int],\n   [CurrencyAlternateKey] [nvarchar](3),\n   [CurrencyName] [nvarchar](50)\n)\nWITH\n(\n   LOCATION = '/parquet-files/DimCurrency.parquet',\n   DATA_SOURCE = [LakeDataSource],\n   FILE_FORMAT = [ParquetFile]\n)\nGO\n\nSELECT * FROM [saleslt].[dim_currency]\n\n\nCREATE EXTERNAL TABLE [saleslt].[dim_Geography]\n(\n\t[GeographyKey] [int] ,\n\t[City] [nvarchar](30) ,\n\t[StateProvinceCode] [nvarchar](3) ,\n\t[StateProvinceName] [nvarchar](50) ,\n\t[CountryRegionCode] [nvarchar](3) ,\n\t[EnglishCountryRegionName] [nvarchar](50) ,\n\t[SpanishCountryRegionName] [nvarchar](50) ,\n\t[FrenchCountryRegionName] [nvarchar](50) ,\n\t[PostalCode] [nvarchar](15) ,\n\t[SalesTerritoryKey] [int] ,\n\t[IpAddressLocator] [nvarchar](15) )\n\nWITH\n(\n   LOCATION = '/parquet-files/DimGeography.parquet',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n)\nGO\n \n-- Show data\nSELECT * FROM saleslt.dim_Geography;\nGO\nDROP EXTERNAL TABLE [saleslt].dim_Customer\n\nCREATE EXTERNAL TABLE [saleslt].[dim_Customer]\n(\n\t[CustomerKey] [int],\n\t[GeographyKey] [int],\n\t[CustomerAlternateKey] [nvarchar](15),\n\t[Title] [nvarchar](8),\n\t[FirstName] [nvarchar](50),\n\t[MiddleName] [nvarchar](50),\n\t[LastName] [nvarchar](50),\n\t[NameStyle] [int],\n\t[BirthDate] [date],\n\t[MaritalStatus] [nchar](1),\n\t[Suffix] [nvarchar](10),\n\t[Gender] [nvarchar](1),\n\t[EmailAddress] [nvarchar](50),\n\t[YearlyIncome] [money],\n\t[TotalChildren] [tinyint],\n\t[NumberChildrenAtHome] [tinyint],\n\t[EnglishEducation] [nvarchar](40),\n\t[SpanishEducation] [nvarchar](40),\n\t[FrenchEducation] [nvarchar](40),\n\t[EnglishOccupation] [nvarchar](100),\n\t[SpanishOccupation] [nvarchar](100),\n\t[FrenchOccupation] [nvarchar](100),\n\t[HouseOwnerFlag] [nchar](1),\n\t[NumberCarsOwned] [tinyint],\n\t[AddressLine1] [nvarchar](120),\n\t[AddressLine2] [nvarchar](120),\n\t[Phone] [nvarchar](20),\n\t[DateFirstPurchase] [date],\n\t[CommuteDistance] [nvarchar](15) \n)\n   WITH\n(\n   LOCATION = '/parquet-files/DimCustomer.parquet',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n)\nGO\n\n-- Show data\nSELECT TOP 5 * FROM [saleslt].[dim_Customer];\nGO\n\nCREATE EXTERNAL TABLE [saleslt].[Dim_Product_Category]\n(\n\t[ProductCategoryKey] [int],\n\t[ProductCategoryAlternateKey] [int],\n\t[EnglishProductCategoryName] [nvarchar](50),\n\t[SpanishProductCategoryName] [nvarchar](50),\n\t[FrenchProductCategoryName] [nvarchar](50),\n)\n   WITH\n(\n   LOCATION = '/parquet-files/DimProductCategory/DimProductCategory.parquet',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n);\nGO\n\nCREATE EXTERNAL TABLE [saleslt].[Dim_Date]\n(\n\t[DateKey] [int] ,\n\t[FullDateAlternateKey] [date],\n\t[DayNumberOfWeek] [tinyint],\n\t[EnglishDayNameOfWeek] [nvarchar](10),\n\t[SpanishDayNameOfWeek] [nvarchar](10),\n\t[FrenchDayNameOfWeek] [nvarchar](10),\n\t[DayNumberOfMonth] [tinyint],\n\t[DayNumberOfYear] [smallint],\n\t[WeekNumberOfYear] [tinyint],\n\t[EnglishMonthName] [nvarchar](10),\n\t[SpanishMonthName] [nvarchar](10),\n\t[FrenchMonthName] [nvarchar](10),\n\t[MonthNumberOfYear] [tinyint],\n\t[CalendarQuarter] [tinyint],\n\t[CalendarYear] [smallint],\n\t[CalendarSemester] [tinyint],\n\t[FiscalQuarter] [tinyint],\n\t[FiscalYear] [smallint],\n\t[FiscalSemester] [tinyint]\n)\n   WITH\n(\n   LOCATION = '/parquet-files/DimDate.parquet',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n);\nGO\n\nCREATE EXTERNAL TABLE [saleslt].[Dim_Product](\n\t[ProductKey] [int],\n\t[ProductAlternateKey] [nvarchar](25),\n\t[ProductSubcategoryKey] [int],\n\t[WeightUnitMeasureCode] [nchar](3),\n\t[SizeUnitMeasureCode] [nchar](3),\n\t[EnglishProductName] [nvarchar](50),\n\t[SpanishProductName] [nvarchar](50),\n\t[FrenchProductName] [nvarchar](50),\n\t[StandardCost] [money],\n\t[FinishedGoodsFlag] [bit],\n\t[Color] [nvarchar](15),\n\t[SafetyStockLevel] [smallint],\n\t[ReorderPoint] [smallint],\n\t[ListPrice] [money],\n\t[Size] [nvarchar](50),\n\t[SizeRange] [nvarchar](50),\n\t[Weight] [float],\n\t[DaysToManufacture] [int],\n\t[ProductLine] [nchar](2),\n\t[DealerPrice] [money],\n\t[Class] [nchar](2),\n\t[Style] [nchar](2),\n\t[ModelName] [nvarchar](50),\n\t[LargePhoto] [varbinary](max),\n\t[EnglishDescription] [nvarchar](400),\n\t[FrenchDescription] [nvarchar](400),\n\t[ChineseDescription] [nvarchar](400),\n\t[ArabicDescription] [nvarchar](400),\n\t[HebrewDescription] [nvarchar](400),\n\t[ThaiDescription] [nvarchar](400),\n\t[GermanDescription] [nvarchar](400),\n\t[JapaneseDescription] [nvarchar](400),\n\t[TurkishDescription] [nvarchar](400),\n\t[StartDate] [datetime],\n\t[EndDate] [datetime],\n\t[Status] [nvarchar](7)\n)\n\t   WITH\n(\n   LOCATION = '/parquet-files/DimProduct.parquet',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n);\nGO\n\nCREATE EXTERNAL TABLE [saleslt].[Dim_Product_Subcategory]\n(\n\t[ProductSubcategoryKey] [int],\n\t[ProductSubcategoryAlternateKey] [int],\n\t[EnglishProductSubcategoryName] [nvarchar](50),\n\t[SpanishProductSubcategoryName] [nvarchar](50),\n\t[FrenchProductSubcategoryName] [nvarchar](50),\n\t[ProductCategoryKey] [int]\n)\n\t  WITH\n(\n   LOCATION = '/parquet-files/DimProductSubcategory.parquet',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n);\nGO\n\nCREATE EXTERNAL TABLE [saleslt].[Dim_Sales_Reason]\n(\n\t[SalesReasonKey] [int],\n\t[SalesReasonAlternateKey] [int],\n\t[SalesReasonName] [nvarchar](50),\n\t[SalesReasonReasonType] [nvarchar](50)\n)\n\t WITH\n(\n   LOCATION = '/parquet-files/DimSalesReason.parquet',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n);\nGO\n\n\nCREATE EXTERNAL TABLE [saleslt].[Dim_Sales_Territory]\n(\n\t[SalesTerritoryKey] [int],\n\t[SalesTerritoryAlternateKey] [int],\n\t[SalesTerritoryRegion] [nvarchar](50),\n\t[SalesTerritoryCountry] [nvarchar](50),\n\t[SalesTerritoryGroup] [nvarchar](50),\n\t[SalesTerritoryImage] [varbinary](max)\n)\n    WITH\n(\n   LOCATION = '/parquet-files/DimSalesTerritory.parquet',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n);\nGO\n\nCREATE EXTERNAL TABLE [saleslt].[Fact_Internet_Sales_Reason]\n(\n\t[SalesOrderNumber] [nvarchar](20),\n\t[SalesOrderLineNumber] [tinyint],\n\t[SalesReasonKey] [int]\n)\n   WITH\n(\n   LOCATION = '/parquet-files/FactInternetSalesReason.parquet',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n);\nGO\n\nCREATE EXTERNAL TABLE [saleslt].[fact_internet_sales]\n(\n   [ProductKey] [int],\n   [OrderDateKey] [int],\n   [DueDateKey] [int],\n   [ShipDateKey] [int],\n   [CustomerKey] [int],\n   [PromotionKey] [int],\n   [CurrencyKey] [int],\n   [SalesTerritoryKey] [int],\n   [SalesOrderNumber] [nvarchar](20),\n   [SalesOrderLineNumber] [tinyint],\n   [RevisionNumber] [tinyint],\n   [OrderQuantity] [smallint],\n   [UnitPrice] [money],\n   [ExtendedAmount] [money],\n   [UnitPriceDiscountPct] DECIMAL(19, 4),\n   [DiscountAmount] DECIMAL(19, 4),\n   [ProductStandardCost] [money],\n   [TotalProductCost] [money],\n   [SalesAmount] [money],\n   [TaxAmt] [money],\n   [Freight] [money],\n   [CarrierTrackingNumber] [nvarchar](25),\n   [CustomerPONumber] [nvarchar](25),\n   [OrderDate] [datetime],\n   [DueDate] [datetime],\n   [ShipDate] [datetime]\n)\nWITH\n(\n   LOCATION = '/parquet-files/FactInternetSales/**',\n   DATA_SOURCE = LakeDataSource,\n   FILE_FORMAT = ParquetFile\n)\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/JSON_VALUE_AND_JSON_QUERY')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "query to retrieve info from a json file using json_value & json_query combined",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2/Json_Scripts"
+				},
+				"content": {
+					"query": "--CREATE VIEW [dbo].[vw_product_json]\n\t--AS \nSELECT \n       JSON_VALUE (jsonContent, '$.id') AS ID,\n       JSON_VALUE (jsonContent, '$.productname')AS ProductName,\n       JSON_VALUE (jsonContent, '$.productnumber') AS ProductNumber,\n       JSON_VALUE (jsonContent, '$.color') AS Color,\n       JSON_VALUE (jsonContent, '$.size') AS Size,\n       JSON_VALUE (jsonContent, '$.weight') AS Weight,\n       JSON_VALUE (jsonContent, '$.quantityinstock') AS Quantityinstock,\n       JSON_VALUE (jsonContent, '$.model') AS model,\n       JSON_VALUE (jsonContent, '$.description') AS Description,\n       JSON_QUERY (jsoncontent, '$.productcategory') AS \"Category&Subcategory\"\n\nFROM\n    OPENROWSET(\n        BULK 'https://satestdebc.dfs.core.windows.net/synapse/json-files/product1.json',\n        FORMAT = 'CSV',\n        FIELDQUOTE = '0x0b',\n        FIELDTERMINATOR ='0x0b',\n        ROWTERMINATOR = '0x0b'\n    )\n    WITH (\n        jsonContent varchar(MAX)\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Join_script_for_sales_products_customers')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "Join script for all three tables",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject1"
+				},
+				"content": {
+					"query": "SELECT s.sale_id, c.name AS customer_name, c.email, p.name AS product_name, p.category, s.quantity, s.price, (s.quantity * s.price) AS total_price, s.sale_date\nFROM dbo.Sales AS s \nJOIN dbo.Products AS p\n ON s.product_id = p.product_id\nJOIN dbo.Customers AS c\n ON s.customer_id = c.customer_id",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Josn_query_jsoncontent')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "script to query a Json file using jsonvalues and openrowset from an external data source",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2/Json_Scripts"
+				},
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT TOP 100\n   --jsonContent\n/* --> place the keys that you see in JSON documents in the WITH clause:*/\n        JSON_VALUE (jsonContent, '$.Month') AS Month\n       ,JSON_VALUE (jsonContent, '$.Company') AS Company\n       ,JSON_VALUE (jsonContent, '$.Sales[0].Product') AS SalesProduct\n       ,JSON_VALUE (jsonContent, '$.Sales[1].ManufacturerProductCode') AS ManufacturerProductCode\n       ,JSON_VALUE (jsonContent, '$.Sales[0].Units') AS Units\n\nFROM\n    OPENROWSET(\n        BULK 'https://mynewstorageacctdb.dfs.core.windows.net/source/landing/Azure-Data-Factory-datasets/Azure-Data-Factory-by-Example-Second-Edition-main/SampleData/SugarCube/2020/Q2/April.json',\n        FORMAT = 'CSV',\n        FIELDQUOTE = '0x0b',\n        FIELDTERMINATOR ='0x0b',\n        ROWTERMINATOR = '0x0b'\n    )\n    WITH (\n        jsonContent varchar(MAX)\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Query_to_view_databse_scoped_credentials_name')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "SELECT NAME FROM sys.database_scoped_credentials;\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "SELECT TOP (100) [make]\n,[model]\n,[vehicleType]\n,[state]\n,[tollAmount]\n,[tag]\n,[tollId]\n FROM [dbo].[TollInfo]",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "dedsqlpoolforstreamingdata",
+						"poolName": "dedsqlpoolforstreamingdata"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script external data source')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "establish a connection with external data source and query data in the bronze folder\nadlsaccount",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject1"
+				},
+				"content": {
+					"query": "CREATE DATABASE MOH\nUSE MOH\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'qwerty@1'\nCREATE DATABASE SCOPED CREDENTIAL mohammed\nWITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET ='sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-05-20T04:06:18Z&st=2025-05-19T20:06:18Z&spr=https&sig=UYEaYAHaslxsRw%2BSbZTnSd%2FSy8Ao2fN1NRoZ6MyeHvY%3D';\n\nCREATE EXTERNAL DATA SOURCE moh\nWITH(\n    LOCATION = 'https://mynewstorageacctdb.blob.core.windows.net/source/bronze',\n    CREDENTIAL = mohammed\n)\n\nSELECT TOP 5 customer_id, customer_city, customer_state\nFROM\nOPENROWSET(\n    BULK 'olist_customer',\n    DATA_SOURCE = 'moh',\n    FORMAT ='CSV',\n    PARSER_VERSION ='2.0',\n    HEADER_ROW = TRUE\n) AS olistcustomer\nORDER BY customer_city DESC\n\n--DROP EXTERNAL DATA SOURCE moh\n--DROP DATABASE SCOPED CREDENTIAL mohammed\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "MOH",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script_create_view_using_json_file')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "script to create view using json file",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2/Json_Scripts"
+				},
+				"content": {
+					"query": "CREATE VIEW [dbo].[vw_product_json]\n\tAS \nSELECT \n       JSON_VALUE (jsonContent, '$.id') AS ID,\n       JSON_VALUE (jsonContent, '$.productname')AS ProductName,\n       JSON_VALUE (jsonContent, '$.productnumber') AS ProductNumber,\n       JSON_VALUE (jsonContent, '$.color') AS Color,\n       JSON_VALUE (jsonContent, '$.size') AS Size,\n       JSON_VALUE (jsonContent, '$.weight') AS Weight,\n       JSON_VALUE (jsonContent, '$.quantityinstock') AS Quantityinstock,\n       JSON_VALUE (jsonContent, '$.model') AS model,\n       JSON_VALUE (jsonContent, '$.description') AS Description,\n       JSON_VALUE (jsonContent, '$.productcategory.subcategory') AS Subcategory,\n       JSON_VALUE (jsonContent, '$.productcategory.category') AS category\n\nFROM\n    OPENROWSET(\n        BULK 'https://satestdebc.dfs.core.windows.net/synapse/json-files/product1.json',\n        FORMAT = 'CSV',\n        FIELDQUOTE = '0x0b',\n        FIELDTERMINATOR ='0x0b',\n        ROWTERMINATOR = '0x0b'\n    )\n    WITH (\n        jsonContent varchar(MAX)\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "mssqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script_to query_json_file using JSON_VALUE')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "using JSON VALUE",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2/Json_Scripts"
+				},
+				"content": {
+					"query": "\nSELECT \n       JSON_VALUE (jsonContent, '$.id') AS ID,\n       JSON_VALUE (jsonContent, '$.productname')AS ProductName,\n       JSON_VALUE (jsonContent, '$.productnumber') AS ProductNumber,\n       JSON_VALUE (jsonContent, '$.color') AS Color,\n       JSON_VALUE (jsonContent, '$.size') AS Size,\n       JSON_VALUE (jsonContent, '$.weight') AS Weight,\n       JSON_VALUE (jsonContent, '$.quantityinstock') AS Quantityinstock,\n       JSON_VALUE (jsonContent, '$.model') AS model,\n       JSON_VALUE (jsonContent, '$.description') AS Description,\n       JSON_VALUE (jsonContent, '$.productcategory.subcategory') AS Subcategory,\n       JSON_VALUE (jsonContent, '$.productcategory.category') AS category\n\nFROM\n    OPENROWSET(\n        BULK 'https://satestdebc.dfs.core.windows.net/synapse/json-files/product1.json',\n        FORMAT = 'CSV',\n        FIELDQUOTE = '0x0b',\n        FIELDTERMINATOR ='0x0b',\n        ROWTERMINATOR = '0x0b'\n    )\n    WITH (\n        jsonContent varchar(MAX)\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script_to_give_user_rights_to_Abolade')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "--\n--give user rights to credential\n--\n \n-- Give rights to credential\nGRANT CONTROL ON DATABASE SCOPED CREDENTIAL :: [LakeCredential] TO [Abolade];\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL_QUERY_EXT_JSON_FILE')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "SQL script to query json file on an external storage using external data source",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject1"
+				},
+				"content": {
+					"query": "\nSELECT TOP 10 JSON_DOC \nFROM OPENROWSET(\n    BULK '/data-types/jsonfile/sales.json',\n    DATA_SOURCE = 'enterpriselake',\n    FORMAT = 'CSV',\n    FIELDTERMINATOR = '0X0B',\n    FIELDQUOTE = '0x0B',\n    ROWTERMINATOR = '0X0B'\n)  WITH (JSON_DOC nvarchar(max)) AS RESULT",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "companydb",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL_Script_Define_Test_Database')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "--\n-- 0 – Simple environment queries\n--\n \n-- Switch database\nUSE master;\nGO\n \n-- Who am I logged in as?\nSELECT CURRENT_USER as CUR_USER, SYSTEM_USER as SYS_USER;\nGO\n \n-- What are the database names?\nSELECT * FROM sys.databases;\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL_Script_list_user_defined_tables')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "query the system tables to obtain a list of our user-defined tables.",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "\n \nSELECT\n    S.NAME AS schema_nm,\n    O.NAME AS table_nm,\n    O.type,\n    O.type_desc,\n    O.create_date\nFROM\n    SYS.SCHEMAS S JOIN SYS.OBJECTS O\nON\n    S.SCHEMA_ID = O.SCHEMA_ID\nWHERE\n    IS_MS_SHIPPED = 0;\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL_script_to_create_a_login')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "--\n-- create a login\n \n-- Which database?\nUSE master;\nGO\n \n-- Drop login\nDROP LOGIN [Abolade]\n \n-- Create login\nCREATE LOGIN [Abolade] WITH PASSWORD = 'mypasswordtest@123', DEFAULT_DATABASE = sqltips;\nGO\n \n-- Show logins\nSELECT * FROM sys.sql_logins\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL_script_to_create_view')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "--\n---------– Create a view\n--DROP VIEW [saleslt].rpt_prepared_data\n\nCREATE VIEW [saleslt].rpt_prepared_data\nAS\nSELECT\n   pc.EnglishProductCategoryName\n  ,Coalesce(p.ModelName, p.EnglishProductName) AS Model\n  ,c.CustomerKey\n  ,s.SalesTerritoryGroup AS Region\n  ,DATEDIFF(DAY, c.BirthDate, current_timestamp) / 365.25 AS Age\n  ,CASE\n      WHEN c.YearlyIncome < 40000 THEN 'Low'\n      WHEN c.YearlyIncome > 60000 THEN 'High'\n      ELSE 'Moderate'\n  END AS IncomeGroup\n  ,d.CalendarYear\n  ,d.FiscalYear\n  ,d.MonthNumberOfYear AS Month\n  ,f.SalesOrderNumber AS OrderNumber\n  ,f.SalesOrderLineNumber AS LineNumber\n  ,f.OrderQuantity AS Quantity\n  ,f.ExtendedAmount AS Amount\nFROM\n  [saleslt].fact_internet_sales as f\nINNER JOIN\n  [saleslt].dim_date as d\nON\n  f.OrderDateKey = d.DateKey\n \nINNER JOIN\n  [saleslt].dim_product as p\nON\n  f.ProductKey = p.ProductKey\n  \nINNER JOIN\n  [saleslt].dim_product_subcategory as psc\nON\n  p.ProductSubcategoryKey = psc.ProductSubcategoryKey\n \nINNER JOIN\n  [saleslt].dim_product_category as pc\nON\n  psc.ProductCategoryKey = pc.ProductCategoryKey\n  \nINNER JOIN \n  [saleslt].dim_customer as c\nON\n  f.CustomerKey = c.CustomerKey\n \nINNER JOIN\n  [saleslt].dim_geography as g\nON\n  c.GeographyKey = g.GeographyKey\n \nINNER JOIN\n  [saleslt].dim_sales_territory as s\nON\n  g.SalesTerritoryKey = s.SalesTerritoryKey\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL_script_to_query_json_file')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject1"
+				},
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT TOP 100\n    jsonContent\n/* --> place the keys that you see in JSON documents in the WITH clause:\n       , JSON_VALUE (jsonContent, '$.key1') AS header1\n       , JSON_VALUE (jsonContent, '$.key2') AS header2\n*/\nFROM\n    OPENROWSET(\n        BULK 'https://storagededls.dfs.core.windows.net/data-types/jsonfile/products.json',\n        FORMAT = 'CSV',\n        FIELDQUOTE = '0x0b',\n        FIELDTERMINATOR ='0x0b',\n        ROWTERMINATOR = '0x0b'\n    )\n    WITH (\n        jsonContent varchar(MAX)\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "companydb",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL_script_view_in_aggregation')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "The T-SQL below summarizes sales by year, month, region, and model number. Given this information, the sales manager can see what products are being sold monthly.",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "\n--Use view in aggregation\n \nSELECT\n  CalendarYear as RptYear,\n  Month as RptMonth,\n  Region as RptRegion,\n  Model as ModelNo,\n  SUM(Quantity) as TotalQty,\n  SUM(Amount) as TotalAmt\nFROM\n  [saleslt].rpt_prepared_data\nGROUP BY\n  CalendarYear,\n  Month,\n  Region,\n  Model\nORDER BY\n  CalendarYear,\n  Month,\n  Region;\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQLscriptToCreateJsonViewSales')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2/Json_Scripts"
+				},
+				"content": {
+					"query": "CREATE VIEW [dbo].[vw_sales_json]\n\tAS \nSELECT \n    JSON_VALUE('{\"orderId\":\"4567\"}', '$.orderId') AS orderId,\n    JSON_VALUE('{\"orderDate\":\"2022-04-28\"}', '$.orderDate') AS orderDate,\n    JSON_VALUE('{\"orderSource\":\"webstore\"}', '$.orderSource') AS orderSource,\n    JSON_VALUE('{\"customerDevice\":\"android\"}', '$.customerDevice') AS customerDevice\n\nFROM\n    OPENROWSET(\n        BULK 'https://satestdebc.dfs.core.windows.net/synapse/json-files/sales.json',\n        FORMAT = 'CSV',\n        FIELDQUOTE = '0x0b',\n        FIELDTERMINATOR ='0x0b',\n        ROWTERMINATOR = '0x0a'\n    )\n    WITH (\n        jsonContent varchar(MAX)\n    ) AS [result]",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQLscript_Create_External_File_Format_Data_Source')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "-SQL script to create external file format and external data source without database scoped credential. \n\n- Depends on managed identity having access to adls gen2 account/container",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "USE master;\nGO\n\nDROP DATABASE IF EXISTS mssqltips;\nGO\n\nCREATE DATABASE mssqltips;\nGO\n\nUSE mssqltips;\nGO\n\nCREATE EXTERNAL DATA SOURCE DataLakeSource\nWITH(\n    LOCATION = 'abfss://synapse@satestdebc.dfs.core.windows.net/'\n);\nGO\n\n-- Delimited external file format\n\nCREATE EXTERNAL FILE FORMAT DelimitedFile\nWITH (\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS\n        ( FIELD_TERMINATOR ='|',\n          USE_TYPE_DEFAULT = FALSE\n        )\n);\nGO\n\n-- Parquet external file format\n\nCREATE EXTERNAL FILE FORMAT ParquetFile\nWITH (\n    FORMAT_TYPE = PARQUET\n);\nGO\n\n -- Create external table\n\n \n-- Drop old table\nDROP EXTERNAL TABLE dim_currency;\nGO\n \n-- Create new table\nCREATE EXTERNAL TABLE dim_currency\n(\n        CurrencyKey int,\n   CurrencyAlternateKey nvarchar(3),\n   CurrencyName nvarchar(50)\n)\nWITH\n(\n   LOCATION = '/csv-files/DimCurrency.csv',\n   DATA_SOURCE = DataLakeSource,\n   FILE_FORMAT = DelimitedFile\n)\nGO\n\n-- Drop old table\nDROP EXTERNAL TABLE fact_internet_sales;\nGO\n\n-- Create external table\n\nCREATE EXTERNAL TABLE fact_internet_sales\n(\n   [ProductKey] [int],\n   [OrderDateKey] [int],\n   [DueDateKey] [int],\n   [ShipDateKey] [int],\n   [CustomerKey] [int],\n   [PromotionKey] [int],\n   [CurrencyKey] [int],\n   [SalesTerritoryKey] [int],\n   [SalesOrderNumber] [nvarchar](20),\n   [SalesOrderLineNumber] [tinyint],\n   [RevisionNumber] [tinyint],\n   [OrderQuantity] [smallint],\n   [UnitPrice] [money],\n   [ExtendedAmount] [money],\n   [UnitPriceDiscountPct] DECIMAL(19, 4),\n   [DiscountAmount] DECIMAL(19, 4),\n   [ProductStandardCost] [money],\n   [TotalProductCost] [money],\n   [SalesAmount] [money],\n   [TaxAmt] [money],\n   [Freight] [money],\n   [CarrierTrackingNumber] [nvarchar](25),\n   [CustomerPONumber] [nvarchar](25),\n   [OrderDate] [datetime],\n   [DueDate] [datetime],\n   [ShipDate] [datetime]\n)\nWITH\n(\n   LOCATION = '/parquet-files/FactInternetSales/**',\n   DATA_SOURCE = DataLakeSource,\n   FILE_FORMAT = ParquetFile\n)\nGO\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "mssqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQLscript_to_create_user_and_give_read_rights')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "create a user\ncheck principles\nGive read rights",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "\n--create a user\n\n \n-- Which database?\nUSE sqltips;\nGO\n \n-- What are the principles\nSELECT * FROM sys.database_principals where (type='S' or type = 'U')\nGO\n \n-- Drop user\nDROP USER [Abolade];\nGO\n \n-- Create user\nCREATE USER [Abolade] FROM LOGIN [Abolade];\nGO\n \n-- Give read rights\nALTER ROLE db_datareader ADD MEMBER [Abolade];\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqltips",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQLscript_to_query json_using_JSON_VALUE')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject1"
+				},
+				"content": {
+					"query": "\nSELECT TOP 100 \n        JSON_VALUE (jsonContent,'$.product_id') AS C1\n       , JSON_VALUE (jsonContent,'$.name') AS C2\n       ,JSON_VALUE (jsonContent,'$.category') AS C3\n\nFROM\n    OPENROWSET(\n        BULK 'https://storagededls.dfs.core.windows.net/data-types/jsonfile/products.json',\n        FORMAT = 'CSV',\n        FIELDQUOTE = '0x0b',\n        FIELDTERMINATOR ='0x0b',\n        ROWTERMINATOR = '0x0a'\n    )\n    WITH (\n        jsonContent varchar(MAX)\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQLscript_to_query_csvfile')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT\n    TOP 10 *\nFROM\n    OPENROWSET(\n        BULK 'https://satestdebc.dfs.core.windows.net/synapse/csv-files/DimCurrency.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        FIELDTERMINATOR = '|',\n        FIRST_ROW = 1,\n        HEADER_ROW = FALSE\n        )\n\n    WITH \n    (\n        CurrencyKey INT,\n        CurrencyAlias VARCHAR (3),\n        Curreny VARCHAR (50)\n    )\n    AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQLscript_to_query_parquetfile')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2"
+				},
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT\n    TOP 20 *\nFROM\n    OPENROWSET(\n        BULK 'https://satestdebc.dfs.core.windows.net/synapse/parquet-files/DimCurrency.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/external_data_source_with_dedicated_sqlpool')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "Create an external Data Source with Dedicated SQL Pool \nCreating tables and loading data",
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject1"
+				},
+				"content": {
+					"query": "/*USE companydb\nGO (will not work for serverless sql server);*/\n\n-----------------------------------CREATE TABLES FOR SALES, PRODUCTS AND CUSTOMERS\nCREATE TABLE dbo.Sales ( sale_id INT, product_id INT, customer_id INT, quantity INT, price FLOAT, sale_date DATE );\nCREATE TABLE dbo.Products ( product_id INT, name NVARCHAR(100), category NVARCHAR(100) );\nCREATE TABLE dbo.Customers ( customer_id INT, name NVARCHAR(100), email NVARCHAR(100) );\n\n\n\n----------------------------------COPY DATA INTO NEW TABLES FROM ADLS ACCOUNT\nCOPY INTO dbo.Products\nFROM 'https://storagededls.blob.core.windows.net/data-types/csvfile/products.csv'\nWITH (\n FILE_TYPE = 'CSV',\n CREDENTIAL = (IDENTITY= 'Shared Access Signature', SECRET='sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-05-22T05:04:21Z&st=2025-05-17T21:04:21Z&spr=https&sig=%2FpzXa%2FIWS89%2F%2Fhp%2FOGXdq9dz%2FVZqerm5yxW0dRHWKH8%3D'),\nFIELDTERMINATOR = ',',\nROWTERMINATOR = '0x0A',\nFIRSTROW = 2\n);\n\nCOPY INTO dbo.Customers\nFROM 'https://storagededls.blob.core.windows.net/data-types/csvfile/customers.csv'\nWITH (\n FILE_TYPE = 'CSV',\n CREDENTIAL = (IDENTITY = 'Shared Access Signature', SECRET = 'sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-05-22T05:04:21Z&st=2025-05-17T21:04:21Z&spr=https&sig=%2FpzXa%2FIWS89%2F%2Fhp%2FOGXdq9dz%2FVZqerm5yxW0dRHWKH8%3D'),\nFIELDTERMINATOR = ',',\nROWTERMINATOR = '0x0A',\nFIRSTROW = 2\n);\n\nCOPY INTO dbo.Sales\nFROM 'https://storagededls.blob.core.windows.net/data-types/csvfile/sales.csv'\nWITH (\n FILE_TYPE = 'CSV',\n CREDENTIAL = (IDENTITY = 'Shared Access Signature', SECRET = 'sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-05-22T05:04:21Z&st=2025-05-17T21:04:21Z&spr=https&sig=%2FpzXa%2FIWS89%2F%2Fhp%2FOGXdq9dz%2FVZqerm5yxW0dRHWKH8%3D'),\nFIELDTERMINATOR = ',',\nROWTERMINATOR = '0x0A',\nFIRSTROW = 2\n);\n\nSELECT * FROM dbo.Products;\nSELECT * FROM dbo.Customers;\nSELECT * FROM dbo.Sales;\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "dedicatedpool_1",
+						"poolName": "dedicatedpool_1"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/external_table_and_SAS_serverlesspool')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject1"
+				},
+				"content": {
+					"query": "CREATE DATABASE companydb\n\nUSE companydb\n\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Test@1';\n\nCREATE DATABASE SCOPED CREDENTIAL SAS_TOKEN\nWITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = 'sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-05-22T05:04:21Z&st=2025-05-17T21:04:21Z&spr=https&sig=%2FpzXa%2FIWS89%2F%2Fhp%2FOGXdq9dz%2FVZqerm5yxW0dRHWKH8%3D'\n\nCREATE EXTERNAL DATA SOURCE enterpriselake\nWITH (\n    LOCATION = 'https://storagededls.dfs.core.windows.net/',\n    CREDENTIAL = SAS_TOKEN\n    )\n GO;\n \nSELECT *\nFROM OPENROWSET(\n    BULK '/data-types/csvfile/sales.csv',\n    DATA_SOURCE = 'enterpriselake',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0',\n    HEADER_ROW = TRUE\n)AS sales;\n\n--DROP EXTERNAL DATA SOURCE enterpriselake\n\n--DROP DATABASE SCOPED CREDENTIAL CREDENTIAL;\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "companydb",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/json_query_script')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "DE-Boot-Camp/DeProject2/Json_Scripts"
+				},
+				"content": {
+					"query": "\nSELECT \n    JSON_VALUE('{\"orderId\":\"4567\"}', '$.orderId') AS orderId,\n    JSON_VALUE('{\"orderDate\":\"2022-04-28\"}', '$.orderDate') AS orderDate,\n    JSON_VALUE('{\"orderSource\":\"webstore\"}', '$.orderSource') AS orderSource,\n    JSON_VALUE('{\"customerDevice\":\"android\"}', '$.customerDevice') AS customerDevice\n\nFROM\n    OPENROWSET(\n        BULK 'https://satestdebc.dfs.core.windows.net/synapse/json-files/sales.json',\n        FORMAT = 'CSV',\n        FIELDQUOTE = '0x0b',\n        FIELDTERMINATOR ='0x0b',\n        ROWTERMINATOR = '0x0b'\n    )\n    WITH (\n        jsonContent varchar(MAX)\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sql_script_practice')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "create an external table using a server less sql pool and external data source (txt)",
+				"folder": {
+					"name": "TEST PRACTICE RESEARCH"
+				},
+				"content": {
+					"query": "create database new;\ngo\n\nuse new\ngo;\n\ncreate master key encryption by password = 'mypass 988@';\ngo\n\nselect * from sys.symmetric_keys;\ngo\n\ncreate database scoped credential newcred\nwith identity = 'shared access signature' , \nsecret ='sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-07-02T23:17:31Z&st=2025-06-30T15:17:31Z&spr=https&sig=lzc%2FOIxyVCx7%2B9oB3QMZistnpfXu36nFmbKs4ylapNE%3D' ;\ngo\n\nselect * from sys.credentials;\ngo\n\n--drop external data source datasource\n\ncreate external data source datasource\nwith(\n\tlocation = 'https://mynewstorageacctdb.dfs.core.windows.net/source/landing/',\n\tcredential = newcred)\n\n--drop external file format fileformat\n\ncreate external file format fileformat\nwith(\n\tformat_type = delimitedtext,\n\tformat_options\n\t\t\t\t(field_terminator = ',',\n\t\t\t\t string_delimiter = '\"',\n\t\t\t\t first_row = 2,\n\t\t\t\t use_type_default = true\n\t\t\t\t  )\n)\n\n--drop external table JustOneMore\n\ncreate external table JustOneMore\n(SalesMonth nvarchar (50),\nRetailer nvarchar(20),\nProduct nvarchar (50),\nSalesValueUSD float,\nUnitsSold int\n)\nwith (\n\tlocation = 'Azure-Data-Factory-datasets/Azure-Data-Factory-by-Example-Second-Edition-main/SampleData/JustOneMore/SalesData/Apr-2020.txt',\n\tdata_source = datasource,\n\tfile_format = fileformat\n)",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "new",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dedsqlpoolforstreamingdata')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastus"
+		}
+	]
+}

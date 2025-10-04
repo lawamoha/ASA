@@ -1,0 +1,48 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "desynapsespace"
+		},
+		"LsMyCosmosDbNoSql_connectionString": {
+			"value": ""
+		},
+		"desynapsespace-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:desynapsespace.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"linked_service_to_external_adls_accountKey": {
+			"value": ""
+		},
+		"ls_mystorageaccount_accountKey": {
+			"value": ""
+		},
+		"ls_project9_accountKey": {
+			"value": ""
+		},
+		"LSdlstestdebc_properties_typeProperties_url": {
+			"value": "https://satestdebc.dfs.core.windows.net/"
+		},
+		"city_safety_boston_sasUri": {
+			"value": ""
+		},
+		"city_safety_newyork_sasUri": {
+			"value": ""
+		},
+		"desynapsespace-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://synapsedatalake109.dfs.core.windows.net"
+		},
+		"linked_service_to_external_adls_properties_typeProperties_url": {
+			"value": "https://storagededls.dfs.core.windows.net/"
+		},
+		"ls_mystorageaccount_properties_typeProperties_url": {
+			"value": "https://mynewstorageacctdb.dfs.core.windows.net/"
+		},
+		"ls_project9_properties_typeProperties_url": {
+			"value": "https://sacproject9.dfs.core.windows.net/"
+		},
+		"us-employment-hours-earnings-state_sasUri": {
+			"value": ""
+		}
+	}
+}
