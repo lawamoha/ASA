@@ -1,5 +1,5 @@
 {
-	"name": "Pipeline 1",
+	"name": "CustomerUpdateSCDType1",
 	"properties": {
 		"activities": [
 			{
@@ -30,8 +30,7 @@
 						"coreCount": 8,
 						"computeType": "General"
 					},
-					"traceLevel": "Fine",
-					"sourceStagingConcurrency": 1
+					"traceLevel": "Fine"
 				}
 			}
 		],
