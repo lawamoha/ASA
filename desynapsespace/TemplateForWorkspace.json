@@ -75,6 +75,61 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/Pipeline 1')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "UpdateCustomerDimension",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SourceDB": {},
+									"DimCustomer": {},
+									"Sink": {}
+								}
+							},
+							"staging": {
+								"linkedService": {
+									"referenceName": "LSdlstestdebc",
+									"type": "LinkedServiceReference"
+								},
+								"folderPath": "synapse"
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine",
+							"sourceStagingConcurrency": 1
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/UpdateCustomerDimension')]",
+				"[concat(variables('workspaceId'), '/linkedServices/LSdlstestdebc')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/CustomerSource')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -798,7 +853,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "select count(*) from dbo.CustomerSource\n\nselect * from dbo.dimcustomer",
+					"query": "select * from dbo.CustomerSource\nwhere CustomerID = 4\n\nselect * from dbo.dimcustomer\nwhere customerid =4\n\n\nUPDATE [dbo].[CustomerSource]\nSET LastName = 'Lopez'\nWHERE [CustomerId] = 4",
 					"metadata": {
 						"language": "sql"
 					},
